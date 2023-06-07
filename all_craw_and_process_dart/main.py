@@ -141,7 +141,8 @@ def craw_and_process(choice=None):
         except Exception as e:
             print(f"현재시간: {datetime.datetime.now()}")
             print(f"에러 발생으로 {sleep_time/60}분 만큼 대기 시작: {e}")
-            time.sleep(sleep_time * 2)
+            time.sleep(sleep_time)
+            sleep_time *= 2
 
     end = time.time()
     sec = (end - start)

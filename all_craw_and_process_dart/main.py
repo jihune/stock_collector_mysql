@@ -1,4 +1,3 @@
-import datetime
 import time
 import os
 import stock.filter_data as filter_data

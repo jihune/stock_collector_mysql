@@ -87,8 +87,16 @@ class daily_craw_config():
 
     # KRX300를 종목을 가져오는 함수
     def get_item(self):
-        # print("KRX300 지수 해당종목 Collect")
-        self.code_df = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=17', header=0)[0]  # 종목코드가 6자리이기 때문에 6자리를 맞춰주기 위해 설정해줌
+
+        kospi200_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=06', header=0)[0]
+        kosdaq150_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=16', header=0)[0]
+        krx300_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=17', header=0)[0]
+
+        # 합치기
+        self.code_df = pd.concat([kospi200_data, kosdaq150_data, krx300_data])
+
+        # 중복 행 제거
+        self.code_df.drop_duplicates(inplace=True)
 
         # 6자리 만들고 앞에 0을 붙인다.
         self.code_df.종목코드 = self.code_df.종목코드.map('{:06d}'.format)

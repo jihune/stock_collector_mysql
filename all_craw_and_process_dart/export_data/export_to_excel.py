@@ -11,7 +11,7 @@ class ExportToData:
         writer = self.pandas.ExcelWriter(file_path, engine='openpyxl')
         file.to_excel(writer, sheet_name=sheet_name)
 
-        writer.save()
+        writer.close()  # 작성자 객체를 닫습니다.
         print("Export complete.")
 
     def export_to_excel_with_many_sheets(self, file_path, files: array):
@@ -21,5 +21,5 @@ class ExportToData:
         for sheet_name, file in files:
             file.to_excel(writer, sheet_name=sheet_name)
 
-        writer.save()
+        writer.close()  # 작성자 객체를 닫습니다.
         print("Export complete.")

@@ -41,19 +41,19 @@ def filtering_data_that_market_index_kospi200(data: pd.DataFrame):
     kospi200_data = pd.read_html(
         'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=06', header=0)[0]
 
-    kospi200['종목코드'] = kospi200.종목코드.map('{:06d}'.format)
+    kospi200_data['종목코드'] = kospi200_data.종목코드.map('{:06d}'.format)
 
-    merged_data = data.merge(kospi200, left_on='종목코드', right_on='종목코드', how='inner')
+    merged_data = data.merge(kospi200_data, left_on='종목코드', right_on='종목코드', how='inner')
 
     return merged_data
 
 def filtering_data_that_market_index_kosdaq150(data: pd.DataFrame):
-    kosdaq150 = pd.read_html(
+    kosdaq150_data = pd.read_html(
         'http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=16', header=0)[0]
 
-    kosdaq150['종목코드'] = kosdaq150.종목코드.map('{:06d}'.format)
+    kosdaq150_data['종목코드'] = kosdaq150_data.종목코드.map('{:06d}'.format)
 
-    merged_data = data.merge(kosdaq150, left_on='종목코드', right_on='종목코드', how='inner')
+    merged_data = data.merge(kosdaq150_data, left_on='종목코드', right_on='종목코드', how='inner')
 
     return merged_data
 
@@ -66,6 +66,11 @@ def filtering_data_that_market_index_krx300(data: pd.DataFrame):
     merged_data = data.merge(krx300_data, left_on='종목코드', right_on='종목코드', how='inner')
 
     return merged_data
+
+def filtering_data_that_market_index_test(data: pd.DataFrame):
+    filtered_data = data[data['종목코드'] == '005930']
+
+    return filtered_data
 
 def filtering_low_per(sheet_name, df_copied: pd.DataFrame, all_data=False):
     """
@@ -153,34 +158,6 @@ def filtering_high_div(sheet_name, df: pd.DataFrame):
             df.sort_values(by=["DIV"], ascending=False).reset_index(drop=True)
             )
 
-def filtering_low_pbr_and_high_gpa(sheet_name, pbr: float, df: pd.DataFrame):
-    """
-    Profitable value. 노비 마르크스. 저 PBR 고 GPA
-    최근분기 데이터로 계산
-    :param pbr:
-    :param df:
-    :return:
-    """
-    gpa_condition = (df['GP/A'] > 0)
-
-    df.drop(
-        df[df["PER"] <= 0].index,
-        inplace=True
-    )
-
-    df = df[df['PBR'].between(0.2, pbr)].copy()
-    df2 = df[gpa_condition]
-    df2["PBR rank"] = df2.groupby("연도")["PBR"].rank(ascending=True)
-    df2["GP/A rank"] = df2.groupby("연도")["GP/A"].rank(ascending=False)
-
-    df2["PBR and GP/A score"] = df2["PBR rank"] + df2["GP/A rank"]
-
-    return (sheet_name,
-            df2.sort_values(by=['연도', 'PBR and GP/A score'], ascending=[False, True]).reset_index(
-                drop=True)
-            )
-
-
 def filtering_peg(sheet_name, df: pd.DataFrame):
     """
     PEG, PER/이익 성장률
@@ -240,7 +217,6 @@ def filtering_high_ncav_cap_and_gpa(sheet_name, df: pd.DataFrame):
             df.sort_values(by=['연도', "Total score"], ascending=[False, True]).reset_index(
                 drop=True)
             )
-
 
 def filtering_value_factor(sheet_name, df: pd.DataFrame):
     """
@@ -582,7 +558,7 @@ def filtering_value_and_profit_momentum(sheet_name, df: pd.DataFrame):
 
 
 def filtering_s_rim_disparity_all_data(sheet_name, df: pd.DataFrame):
-    df["S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
+    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
 
     return (sheet_name,
             df.sort_values(by=["S-RIM 괴리율"], ascending=False).reset_index(drop=True)
@@ -599,14 +575,14 @@ def filtering_s_rim_disparity_and_high_nav(sheet_name, df: pd.DataFrame):
 
     latest_date = df["연도"].max()
 
-    df = df[df["연도"] == latest_date]
+    df = df[df["연도"] == latest_date].copy()
 
-    df["S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
+    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
 
-    df["NCAV/MC rank"] = df["NCAV/MC"].rank(ascending=False)
-    df["S-RIM 괴리율 rank"] = df["S-RIM 괴리율"].rank(ascending=True)
+    df.loc[:, "NCAV/MC rank"] = df["NCAV/MC"].rank(ascending=False)
+    df.loc[:, "S-RIM 괴리율 rank"] = df["S-RIM 괴리율"].rank(ascending=True)
 
-    df["Total score"] = df["NCAV/MC rank"] + df["S-RIM 괴리율 rank"]
+    df.loc[:, "Total score"] = df["NCAV/MC rank"] + df["S-RIM 괴리율 rank"]
 
     return (sheet_name,
             df.sort_values(by=["Total score"], ascending=True).reset_index(drop=True)
@@ -614,6 +590,9 @@ def filtering_s_rim_disparity_and_high_nav(sheet_name, df: pd.DataFrame):
 
 
 def drop_column(df: pd.DataFrame):
+    # 이 함수는 사용자가 입력한 값과는 무관하게 시장유형 관계없이 전종목 S-RIM 데이터를 받아오는 곳에서
+    # 크롤링한 데이터를 DataFrame에서 Drop하는 함수이다.
+
     # 스팩 주식 드랍
     df.drop(
         df[df["종목명"].str.contains("스팩")].index,

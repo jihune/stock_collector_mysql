@@ -1,15 +1,12 @@
 import time
 from datetime import datetime
-
 import numpy as np
 from requests.exceptions import SSLError
-
 import stock.extract_data.krx_condition as CONDITION
 from .basic_factor_data.korean_market_factor_data import KoreanMarketFactorData
 import OpenDartReader
 from config.api_key import OPEN_DART_KEY
 import pandas as pd
-
 
 class Extract:
 
@@ -101,7 +98,15 @@ class Extract:
         df_financial = self.__calculate_indicator(df_financial)
 
         print("Join Data------------")
-        return pd.merge(df, df_financial, left_on="종목코드", right_on="종목코드", how="outer")
+        merged_df = pd.merge(df, df_financial, left_on="종목코드", right_on="종목코드", how="outer")
+
+        # DataFrame을 종목코드와 연도로 정렬합니다.
+        merged_df.sort_values(by=['종목코드', '연도'], ascending=[True, False])
+
+        # 종목코드를 기준으로 중복된 행을 제거하고 최신 데이터만 남깁니다.
+        merged_df.drop_duplicates(subset='종목코드', keep='first')
+
+        return merged_df
 
     def __find_financial_indicator(self, stock_code, year):
         current_assets = [0, 0, 0, 0]  # 유동자산
@@ -147,11 +152,11 @@ class Extract:
                     break
 
             if report is None:  # 리포트가 없다면 반복문 종료하기
-                time.sleep(0.2)
+                time.sleep(0.3)
                 continue
 
             elif report.empty:
-                time.sleep(0.2)
+                time.sleep(0.3)
                 continue
 
             else:
@@ -488,9 +493,18 @@ class Extract:
             return -1
 
     def __calculate_quarter_data(self, index, df: pd.DataFrame, column_name):
-        return df.iloc[index]["시가총액"] / (
-                df.iloc[index - 3][column_name] + df.iloc[index - 2][column_name] +
-                df.iloc[index - 1][column_name] + df.iloc[index][column_name])
+
+        calc_data = (df.iloc[index - 3][column_name] + df.iloc[index - 2][column_name]
+                     + df.iloc[index - 1][column_name] + df.iloc[index][column_name])
+
+        if df.iloc[index]["시가총액"] == 0:
+            result_calc = 0
+        elif calc_data == 0:
+            result_calc = 0
+        else:
+            result_calc = df.iloc[index]["시가총액"] / calc_data
+
+        return result_calc
 
     def __extract_s_rim_data(self):
 

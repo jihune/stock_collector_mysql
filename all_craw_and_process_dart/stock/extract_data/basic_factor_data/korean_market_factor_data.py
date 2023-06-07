@@ -2,7 +2,6 @@ import datetime
 import pandas as pd
 import FinanceDataReader as fdr
 import stock.filter_data as filter_data
-
 from pykrx import stock
 
 class KoreanMarketFactorData:

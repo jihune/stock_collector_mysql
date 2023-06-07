@@ -19,6 +19,7 @@ start = time.time()
 extractor = Extract()
 exporter = ExportToData()
 
+# 아래 데이터는 사용자가 입력한 값과는 무관하게 시장유형 관계없이 전종목 S-RIM 데이터를 받아오는 곳에서 빠르게 받아오는 데이터다.
 kospi_data = extractor.factor_data.get_stock_ticker_and_name_list("KOSPI")
 kosdaq_data = extractor.factor_data.get_stock_ticker_and_name_list("KOSDAQ")
 

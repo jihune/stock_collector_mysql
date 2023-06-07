@@ -62,76 +62,88 @@ def export_data(category, raw_data, extracted_data):
         ]
     )
 
-def main():
-    choice = int(input("소형주: 1 / 대형주: 2 / KOSPI200: 3 / KOSDAQ150 : 4 / KRX300 : 5 / TEST: 6 / 번호를 입력하세요 => "))
-
+def craw_and_process(choice=None):
     start = time.time()
 
-    extractor = Extract()
+    while True:
+        try:
+            if choice is None:
+                choice = int(
+                    input("소형주: 1 / 대형주: 2 / KOSPI200: 3 "
+                          "/ KOSDAQ150 : 4 / KRX300 : 5 / TEST: 6 / 번호를 입력하세요 => "))
 
-    # calling kospi and kosdaq data using pykrx and OpenFinanceReader
-    kospi_kosdaq_data = extractor.get_data()
+            extractor = Extract()
 
-    print("--------------")
+            # calling kospi and kosdaq data using pykrx and OpenFinanceReader
+            kospi_kosdaq_data = extractor.get_data()
 
-    # extract and calculating finance data recent 3 years data
+            print("--------------")
 
-    if choice == 1:
-        print("소형주 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(1, kospi_kosdaq_data)
-        )
-        export_data("소형주", kospi_kosdaq_data, extracted_data)
-    elif choice == 2:
-        print("대형주 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(2, kospi_kosdaq_data)
-        )
-        export_data("대형주", kospi_kosdaq_data, extracted_data)
+            # extract and calculating finance data recent 3 years data
 
-    elif choice == 3:
-        print("KOSPI200 구성종목 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(3, kospi_kosdaq_data)
-        )
-        export_data("KOSPI200", kospi_kosdaq_data, extracted_data)
+            if choice == 1:
+                print("소형주 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(1, kospi_kosdaq_data)
+                )
+                export_data("소형주", kospi_kosdaq_data, extracted_data)
+            elif choice == 2:
+                print("대형주 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(2, kospi_kosdaq_data)
+                )
+                export_data("대형주", kospi_kosdaq_data, extracted_data)
 
-    elif choice == 4:
-        print("KOSDAQ150 구성종목 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(4, kospi_kosdaq_data)
-        )
-        export_data("KOSDAQ150", kospi_kosdaq_data, extracted_data)
+            elif choice == 3:
+                print("KOSPI200 구성종목 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(3, kospi_kosdaq_data)
+                )
+                export_data("KOSPI200", kospi_kosdaq_data, extracted_data)
 
-    elif choice == 5:
-        print("KRX300 구성종목 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(5, kospi_kosdaq_data)
-        )
-        export_data("KRX300", kospi_kosdaq_data, extracted_data)
+            elif choice == 4:
+                print("KOSDAQ150 구성종목 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(4, kospi_kosdaq_data)
+                )
+                export_data("KOSDAQ150", kospi_kosdaq_data, extracted_data)
 
-    elif choice == 6:
-        print("TEST로 삼성전자의 스크래핑을 시작합니다 -------")
-        extracted_data = extractor.extract_finance_data(
-            years,
-            filterging_data(6, kospi_kosdaq_data)
-        )
-        export_data("TEST", kospi_kosdaq_data, extracted_data)
+            elif choice == 5:
+                print("KRX300 구성종목 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(5, kospi_kosdaq_data)
+                )
+                export_data("KRX300", kospi_kosdaq_data, extracted_data)
 
-    else:
-        print("올바르지 않은 번호를 입력했습니다. 프로그램을 종료합니다.")
-        exit()
+            elif choice == 6:
+                print("TEST로 삼성전자의 스크래핑을 시작합니다 -------")
+                extracted_data = extractor.extract_finance_data(
+                    years,
+                    filterging_data(6, kospi_kosdaq_data)
+                )
+                export_data("TEST", kospi_kosdaq_data, extracted_data)
+
+            else:
+                print("올바르지 않은 번호를 입력했습니다. 프로그램을 종료합니다.")
+                exit()
+
+            # If the execution reaches this point without errors, break the loop
+            break
+
+        except Exception as e:
+            print(f"에러 발생으로 1분간 대기 중: {e}")
+            time.sleep(60)
 
     end = time.time()
     sec = (end - start)
 
     result_list = str(datetime.timedelta(seconds=sec)).split(".")
-    print(f"Total extracting time : {result_list[0]} ---------------------")
+    print(f"Total extracting time: {result_list[0]} ---------------------")
 
 if __name__ == "__main__":
-    main()
+    craw_and_process()

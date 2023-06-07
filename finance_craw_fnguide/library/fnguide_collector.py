@@ -7,16 +7,21 @@ import time
 # cf = DB 정보를 담은 mysql-config 파일
 from . import db_config as cf
 from . import kind_stock_list
+from . import my_sql_modify
 
 def get_stock_finance_table():
     # 사용자 입력 받기
     ticker = input("회사명 또는 종목코드를 입력하세요 => ")
 
-    # KRX300의 종목 리스트를 KIND 사이트에서 받아옴
-    tickers = kind_stock_list.collect_krx_300_list()
+    # 종목 리스트를 KIND 사이트에서 받아옴
+    tickers = kind_stock_list.collect_stock_list()
 
     if ticker in tickers.keys() or ticker in tickers.values():
-        print("DB연결 시작")
+
+        # 내 DB서버에 db_name이 없을 경우 생성, 이미 있다면 건너뜀
+        my_sql_modify.create_database()
+
+        print("\nDB연결 시작")
         engine = create_engine(
             "mysql+pymysql://" + cf.db_id + ":" + cf.db_passwd + "@" + cf.db_ip + ":" + cf.db_port
             + "/" + cf.db_name, encoding='utf-8')
@@ -29,7 +34,7 @@ def get_stock_finance_table():
         else:
             code = ticker
 
-        print(f"현재 정보 수집중인 종목: {tickers[code]}")
+        print(f"\n현재 정보 수집중인 종목: {tickers[code]}")
 
         ''' 경로 탐색'''
         url = re.get('http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A%s' % (code))
@@ -103,7 +108,7 @@ def get_stock_finance_table():
         try:
             ''' DB에 저장'''
             finance_table.to_sql(name=tickers[code], con=engine, if_exists='replace', index=False)
-            print(tickers[code] + '의 재무제표를 성공적으로 저장하였습니다.')
+            print(f"{tickers[code]} 종목의 재무제표를 성공적으로 저장하였습니다.")
         except Exception as e:
             print(f"{tickers[code]} 재무제표 저장 중 에러 발생: {e}")
 
@@ -115,15 +120,19 @@ def get_stock_finance_table():
 
 
 def get_many_stock_finance_table():
-    print("DB연결 시작")
+
+    # 내 DB서버에 db_name이 없을 경우 생성, 이미 있다면 건너뜀
+    my_sql_modify.create_database()
+
+    print("\nDB연결 시작")
 
     engine = create_engine(
         "mysql+pymysql://" + cf.db_id + ":" + cf.db_passwd + "@" + cf.db_ip + ":" + cf.db_port
         + "/" + cf.db_name, encoding='utf-8')
     print("DB연결 성공")
 
-    # KRX300의 종목 리스트를 KIND 사이트에서 받아옴
-    tickers = kind_stock_list.collect_krx_300_list()
+    # 종목 리스트를 KIND 사이트에서 받아옴
+    tickers = kind_stock_list.collect_many_stock_list()
 
     # DB 저장 에러 발생 수 카운트
     err_count = 0
@@ -135,7 +144,7 @@ def get_many_stock_finance_table():
     for code in tickers.keys():
 
         index_ += 1
-        print(f"현재 정보 수집중인 {index_}번째 종목: {tickers[code]}")
+        print(f"\n현재 정보 수집중인 {index_}번째 종목: {tickers[code]}")
 
         ''' 경로 탐색'''
         url = re.get('http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A%s' % (code))
@@ -209,7 +218,7 @@ def get_many_stock_finance_table():
         try:
             ''' DB에 저장'''
             finance_table.to_sql(name=tickers[code], con=engine, if_exists='replace', index=False)
-            print(tickers[code] + '의 재무제표를 성공적으로 저장하였습니다.')
+            print(f"{tickers[code]} 종목의 재무제표를 성공적으로 저장하였습니다.")
             time.sleep(0.3)
         except Exception as e:
             err_count += 1
@@ -219,6 +228,7 @@ def get_many_stock_finance_table():
             time.sleep(10)
 
     engine.dispose()
-    print('DB 저장 과정에서 오류가 %s번 발생하였습니다.' % (err_count))
-    if not err_tickers:
+
+    print('\nDB 저장 과정에서 오류가 %s번 발생하였습니다.' % (err_count))
+    if err_tickers:
         print(f"저장 과정에서 오류가 발생한 종목: {err_tickers}")

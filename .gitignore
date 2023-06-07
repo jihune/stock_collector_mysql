@@ -1,4 +1,4 @@
 /finance_craw_fnguide/library/db_config.py
 /finance_craw_fnguide/.idea/
-/transaction_amount_calc/library/db_config.py
 /daily_craw_kiwoom_32/library/cf.py
+/all_craw_and_process_dart/config/api_key.py

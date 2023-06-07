@@ -698,6 +698,7 @@ class open_api(QAxWidget):
         # openapi 조회 count 출력
         logger.debug(self.rq_count)
         if self.rq_count == cf.max_api_call:
+            print("쿼리문이 999회 불렸기 때문에 전체 프로그램 종료")
             sys.exit(1)
 
     # 하나의 종목이 체결이 됐는지 확인

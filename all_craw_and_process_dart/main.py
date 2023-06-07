@@ -4,8 +4,10 @@ import os
 import stock.filter_data as filter_data
 from stock.extract_data.extract import Extract
 from export_data import ExportToData
+import datetime
 
-years = [2021, 2022, 2023]
+this_year = datetime.datetime.now().year
+years = [this_year-2, this_year-1, this_year]
 
 def filterging_data(choice, data):
     if choice == 1:
@@ -63,7 +65,9 @@ def export_data(category, raw_data, extracted_data):
     )
 
 def craw_and_process(choice=None):
+
     start = time.time()
+    sleep_time = 60
 
     while True:
         try:
@@ -136,8 +140,9 @@ def craw_and_process(choice=None):
             break
 
         except Exception as e:
-            print(f"에러 발생으로 1분간 대기 중: {e}")
-            time.sleep(60)
+            print(f"현재시간: {datetime.datetime.now()}")
+            print(f"에러 발생으로 {sleep_time/60}분 만큼 대기 시작: {e}")
+            time.sleep(sleep_time * 2)
 
     end = time.time()
     sec = (end - start)

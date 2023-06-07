@@ -28,7 +28,7 @@ def export_data(category, raw_data, extracted_data):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    # Add current time to the filename
+    # 현재 시간을 파일 이름에 추가합니다.
     current_date = datetime.datetime.today().strftime('%Y%m%d')
     current_time = datetime.datetime.now().strftime('%H%M')
 

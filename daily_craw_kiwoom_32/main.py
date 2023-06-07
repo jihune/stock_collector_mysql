@@ -15,3 +15,5 @@ if __name__ == "__main__":
 
     # 데이터 수집 시작 -> 주식 종목, 종목별 금융 데이터 모두 데이터베이스에 저장.
     c.collecting()
+
+    print("종목별 일별 Data Colleting 완료 및 프로그램 정상종료")

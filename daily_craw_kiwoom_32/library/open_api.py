@@ -1,8 +1,4 @@
 from functools import partial
-
-ver = "#version 1.3.15"
-print(f"open_api Version: {ver}")
-
 from library.simulator_func_mysql import *
 import datetime
 import sys
@@ -11,23 +7,22 @@ from PyQt5.QtCore import *
 import time
 from library import cf
 from collections import defaultdict
-
 import warnings
-warnings.simplefilter(action='ignore', category=UserWarning)
 from pandas import DataFrame
 import re
 import pandas as pd
 import os
-
 from sqlalchemy import create_engine, event, Text, Float
 from sqlalchemy.pool import Pool
-
 import pymysql
 
+warnings.simplefilter(action='ignore', category=UserWarning)
 pymysql.install_as_MySQLdb()
 TR_REQ_TIME_INTERVAL = 0.5
 code_pattern = re.compile(r'\d{6}')  # 숫자 6자리가 연속으로오는 패턴
 
+ver = "#version 1.3.15"
+print(f"open_api Version: {ver}")
 
 def escape_percentage(conn, clauseelement, multiparams, params):
     # execute로 실행한 sql문이 들어왔을 때 %를 %%로 replace
@@ -282,14 +277,8 @@ class open_api(QAxWidget):
             logger.critical(e)
 
     def _receive_msg(self, sScrNo, sRQName, sTrCode, sMsg):
-        logger.debug("_receive_msg 함수에 들어왔습니다!")
-        # logger.debug("sScrNo!!!")
-        # logger.debug(sScrNo)
-        # logger.debug("sRQName!!!")
-        # logger.debug(sRQName)
-        # logger.debug("sTrCode!!!")
-        # logger.debug(sTrCode)
-        # logger.debug("sMsg!!!")
+        logger.debug("_receive_msg 함수에 들어왔습니다")
+
         logger.debug(sMsg)
 
     def _event_connect(self, err_code):
@@ -583,8 +572,6 @@ class open_api(QAxWidget):
 
         return df
 
-    # except Exception as e:
-    #     logger.critical(e)
 
     # daily_craw에 종목 테이블 존재 여부 확인 함수
     def is_craw_table_exist(self, code_name):
@@ -801,31 +788,10 @@ class open_api(QAxWidget):
                 logger.debug(f'{code} 주문 실패')
                 return
 
-            # logger.debug("주문수량!!!")
-            # logger.debug(self.get_chejan_data(900))
-            # logger.debug("주문가격!!!")
-            # logger.debug(self.get_chejan_data(901))
-
-            # logger.debug("미체결수량!!!")
-            # 미체결 수량
             chegyul_fail_amount_temp = self.get_chejan_data(902)
-            # logger.debug(chegyul_fail_amount_temp)
-            # logger.debug("원주문번호!!!")
-            # logger.debug(self.get_chejan_data(904))
-            # logger.debug("주문구분!!!")
-            # order_gubun -> "+매수" or "-매도"
+
             order_gubun = self.get_chejan_data(905)
-            # logger.debug(order_gubun)
-            # logger.debug("주문/체결시간!!!")
-            # logger.debug(self.get_chejan_data(908))
-            # logger.debug("체결번호!!!")
-            # logger.debug(self.get_chejan_data(909))
-            # logger.debug("체결가!!!")
-            # purchase_price=self.get_chejan_data(910)
-            # logger.debug(self.get_chejan_data(910))
-            # logger.debug("체결량!!!")
-            # logger.debug(self.get_chejan_data(911))
-            # logger.debug("현재가, 체결가, 실시간종가")
+
             purchase_price = abs(int(self.get_chejan_data(10)))
 
             if code:
@@ -872,37 +838,10 @@ class open_api(QAxWidget):
         # 국내주식 잔고전달
         elif gubun == "1":
             logger.debug("잔고데이터!!!!!")
-            # logger.debug("item_cnt!!!")
-            # logger.debug(item_cnt)
-            # logger.debug("fid_list!!!")
-            # logger.debug(fid_list)
-            # try:
-            # logger.debug("주문번호!!!")
-            # logger.debug(self.get_chejan_data(9203))
-            # logger.debug("종목명!!!")
-            # logger.debug(self.get_chejan_data(302))
-            # logger.debug("주문수량!!!")
-            # logger.debug(self.get_chejan_data(900))
-            # logger.debug("주문가격!!!")
-            # logger.debug(self.get_chejan_data(901))
-            #
-            # logger.debug("미체결수량!!!")
+
             chegyul_fail_amount_temp = self.get_chejan_data(902)
             logger.debug(chegyul_fail_amount_temp)
-            # logger.debug("원주문번호!!!")
-            # logger.debug(self.get_chejan_data(904))
-            # logger.debug("주문구분!!!")
-            # logger.debug(self.get_chejan_data(905))
-            # logger.debug("주문/체결시간!!!")
-            # logger.debug(self.get_chejan_data(908))
-            # logger.debug("체결번호!!!")
-            # logger.debug(self.get_chejan_data(909))
-            # logger.debug("체결가!!!")
-            # logger.debug(self.get_chejan_data(910))
-            # logger.debug("체결량!!!")
-            # logger.debug(self.get_chejan_data(911))
-            # logger.debug("현재가, 체결가, 실시간종가")
-            # logger.debug(self.get_chejan_data(10))
+
         else:
             logger.debug(
                 "_receive_chejan_data 에서 아무것도 해당 되지않음!")
@@ -1127,7 +1066,7 @@ class open_api(QAxWidget):
             self._data[key] = self._get_comm_data(trcode, rqname, 0, key)
 
     def basic_db_check(self, cursor):
-        check_list = ['daily_craw', 'daily_buy_list', 'min_craw']
+        check_list = ['daily_craw', 'daily_buy_list']
         sql = "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA"
         cursor.execute(sql)
         rows = cursor.fetchall()

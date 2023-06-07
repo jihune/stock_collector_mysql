@@ -1,10 +1,5 @@
 from collections import OrderedDict
-
 from sqlalchemy import Integer, Text, String
-
-ver = "#version 1.5.0"
-print(f"collector_api Version: {ver}")
-
 import numpy
 import pathlib
 from library.open_api import *
@@ -13,6 +8,9 @@ import time
 from PyQt5.QtWidgets import *
 from library.daily_buy_list import *
 from pandas import DataFrame
+
+ver = "#version 1.5.0"
+print(f"collector_api Version: {ver}")
 
 MARKET_KOSPI = 0
 MARKET_KOSDAQ = 10
@@ -47,19 +45,7 @@ class collector_api():
         if rows[0][7] != self.open_api.today:
             self.daily_crawler_check()
 
-        # daily_buy_list db 업데이트
-        if rows[0][9] != self.open_api.today:
-            self.daily_buy_list_check()
-
         logger.debug("Collecting 작업을 모두 정상적으로 마쳤습니다.")
-
-    def daily_buy_list_check(self):
-        # dbl 에서 가져온다
-        self.dbl.daily_buy_list()
-        logger.debug("daily_buy_list success !!!")
-
-        sql = "UPDATE setting_data SET daily_buy_list='%s' limit 1"
-        self.engine_JB.execute(sql % (self.open_api.today))
 
     def db_to_daily_craw(self):
         logger.debug("db_to_daily_craw 함수에 들어왔습니다!")

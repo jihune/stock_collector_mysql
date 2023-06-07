@@ -1,16 +1,6 @@
-ver = "#version 1.3.10"
-print(f"simulator_func_mysql Version: {ver}")
 import sys
-is_64bits = sys.maxsize > 2**32
-if is_64bits:
-    print('64bit 환경입니다.')
-else:
-    print('32bit 환경입니다.')
-
 from sqlalchemy import event
-
 import pymysql.cursors
-
 from library.logging_pack import *
 from library import cf
 from pandas import DataFrame
@@ -19,7 +9,15 @@ import datetime
 from sqlalchemy import create_engine
 
 pymysql.install_as_MySQLdb()
+is_64bits = sys.maxsize > 2**32
 
+if is_64bits:
+    print('64bit 환경입니다.')
+else:
+    print('32bit 환경입니다.')
+
+ver = "#version 1.3.10"
+print(f"simulator_func_mysql Version: {ver}")
 
 class simulator_func_mysql:
     def __init__(self, simul_num, op, db_name):
@@ -1008,7 +1006,6 @@ class simulator_func_mysql:
             clo100 = rows[0][12]
             clo120 = rows[0][13]
 
-
             # 만약에 open가에 어떤 값이 있으면(True) 현재 주가를 all_item_db에 반영 하기 위해 아래 함수를 들어간다.
             if open:
                 self.db_to_all_item_present_price_update(code_name, d1_diff_rate, close, open, high, low, volume, clo5, clo10, clo20,
@@ -1262,34 +1259,7 @@ class simulator_func_mysql:
         self.jango.loc[0, 'today_buy_total_profitcut_count'] = 0
 
         self.jango.loc[0, 'today_buy_total_losscut_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count0_sell_count'] = 0
-        #
-        # self.jango.loc[0, 'today_buy_reinvest_count1_sell_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count2_sell_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count3_sell_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count4_sell_count'] = 0
-        #
-        # self.jango.loc[0, 'today_buy_reinvest_count4_sell_profitcut_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count4_sell_losscut_count'] = 0
-        #
-        # self.jango.loc[0, 'today_buy_reinvest_count5_sell_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count5_sell_profitcut_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count5_sell_losscut_count'] = 0
-        #
-        # self.jango.loc[0, 'today_buy_reinvest_count0_remain_count'] = 0
-        #
-        # self.jango.loc[0, 'today_buy_reinvest_count1_remain_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count2_remain_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count3_remain_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count4_remain_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count4_remain_count'] = 0
-        # self.jango.loc[0, 'today_buy_reinvest_count5_remain_count'] = 0
 
-        # # 데이터베이스에 테이블이 존재할 때 수행 동작을 지정한다.
-        # 'fail', 'replace', 'append' 중 하나를 사용할 수 있는데 기본값은 'fail'이다.
-        # 'fail'은 데이터베이스에 테이블이 있다면 아무 동작도 수행하지 않는다.
-        # 'replace'는 테이블이 존재하면 기존 테이블을 삭제하고 새로 테이블을 생성한 후 데이터를 삽입한다.
-        # 'append'는 테이블이 존재하면 데이터만을 추가한다.
         self.jango.to_sql('jango_data', self.engine_simulator, if_exists='append')
 
         #     # today_earning_rate

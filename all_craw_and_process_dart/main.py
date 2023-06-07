@@ -1,6 +1,6 @@
 import datetime
 import time
-
+import os
 import stock.filter_data as filter_data
 from stock.extract_data.extract import Extract
 from export_data import ExportToData
@@ -18,12 +18,26 @@ def filterging_data(choice, data):
         return filter_data.filtering_data_that_market_index_kosdaq150(data)
     elif choice == 5:
         return filter_data.filtering_data_that_market_index_krx300(data)
+    elif choice == 6:
+        return filter_data.filtering_data_that_market_index_test(data)
 
 def export_data(category, raw_data, extracted_data):
     exporter = ExportToData()
 
+    directory = os.path.join(os.path.dirname(__file__), 'result_xlsx')
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Add current time to the filename
+    current_date = datetime.datetime.today().strftime('%Y%m%d')
+    current_time = datetime.datetime.now().strftime('%H%M')
+
+    file_name = f"{current_date}_{current_time}_{category}.xlsx"
+
+    file_path = os.path.join(directory, file_name)
+
     exporter.export_to_excel_with_many_sheets(
-        f"D:/workspace/{datetime.datetime.today().strftime('%Y%m%d')}_{category}_screeningData.xlsx",
+        file_path,
         [
             filter_data.filtering_low_per("ALL_DATA_저PER", raw_data.copy(), True),
             filter_data.filtering_low_pbr_and_per("ALL_DATA_저PBR_저PER", 1.0, 10, raw_data.copy(), True),
@@ -34,7 +48,6 @@ def export_data(category, raw_data, extracted_data):
             filter_data.filtering_peg(f"{category}_PEG", extracted_data.copy()),
             filter_data.filtering_high_div("고배당률_리스트", raw_data.copy()),
             filter_data.filtering_low_pfcr(f"{category}_저PFCR_시총잉여현금흐름", extracted_data.copy()),
-            filter_data.filtering_low_pbr_and_high_gpa(f"{category}_저PBR_고GPA", 0.8, extracted_data.copy()),
             filter_data.filtering_high_ncav_cap_and_gpa(f"{category}_고NCAV_GPA_저부채비율", extracted_data.copy()),
             filter_data.filtering_s_rim_disparity_and_high_nav(f"{category}_S-RIM_괴리율_고NAV", extracted_data.copy()),
             filter_data.filtering_profit_momentum(f"{category}_모멘텀_전분기대비_영업이익순이익_전략", extracted_data.copy()),
@@ -50,7 +63,7 @@ def export_data(category, raw_data, extracted_data):
     )
 
 def main():
-    choice = int(input("소형주 : 1 / 대형주 : 2 / KOSPI200 : 3 / KOSDAQ150 : 4 / KRX300 : 5 을 입력하세요. "))
+    choice = int(input("소형주: 1 / 대형주: 2 / KOSPI200: 3 / KOSDAQ150 : 4 / KRX300 : 5 / TEST: 6 / 번호를 입력하세요 => "))
 
     start = time.time()
 
@@ -84,7 +97,7 @@ def main():
             years,
             filterging_data(3, kospi_kosdaq_data)
         )
-        export_data("KRX300", kospi_kosdaq_data, extracted_data)
+        export_data("KOSPI200", kospi_kosdaq_data, extracted_data)
 
     elif choice == 4:
         print("KOSDAQ150 구성종목 스크래핑을 시작합니다 -------")
@@ -92,7 +105,7 @@ def main():
             years,
             filterging_data(4, kospi_kosdaq_data)
         )
-        export_data("KRX300", kospi_kosdaq_data, extracted_data)
+        export_data("KOSDAQ150", kospi_kosdaq_data, extracted_data)
 
     elif choice == 5:
         print("KRX300 구성종목 스크래핑을 시작합니다 -------")
@@ -101,6 +114,18 @@ def main():
             filterging_data(5, kospi_kosdaq_data)
         )
         export_data("KRX300", kospi_kosdaq_data, extracted_data)
+
+    elif choice == 6:
+        print("TEST로 삼성전자의 스크래핑을 시작합니다 -------")
+        extracted_data = extractor.extract_finance_data(
+            years,
+            filterging_data(6, kospi_kosdaq_data)
+        )
+        export_data("TEST", kospi_kosdaq_data, extracted_data)
+
+    else:
+        print("올바르지 않은 번호를 입력했습니다. 프로그램을 종료합니다.")
+        exit()
 
     end = time.time()
     sec = (end - start)

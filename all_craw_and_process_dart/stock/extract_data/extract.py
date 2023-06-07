@@ -101,10 +101,10 @@ class Extract:
         merged_df = pd.merge(df, df_financial, left_on="종목코드", right_on="종목코드", how="outer")
 
         # DataFrame을 종목코드와 연도로 정렬합니다.
-        merged_df.sort_values(by=['종목코드', '연도'], ascending=[True, False])
+        merged_df.sort_values(by=['종목코드', '연도'], ascending=[True, False], inplace=True)
 
         # 종목코드를 기준으로 중복된 행을 제거하고 최신 데이터만 남깁니다.
-        merged_df.drop_duplicates(subset='종목코드', keep='first')
+        merged_df.drop_duplicates(subset='종목코드', keep='first', inplace=True)
 
         return merged_df
 

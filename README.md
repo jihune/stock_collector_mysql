@@ -7,6 +7,8 @@
 * 키움증권 API로 종목의 일별 데이터를 수집하고 MySQL에 Schema 및 Table로 저장
 ##### finance_craw_fnguide
 * FnGuide의 특정종목, 전종목 재무제표 데이터를 수집하고 MySQL에 Table화
+##### xlsx-to-mysql
+* 1개 혹은 여러 개의 엑셀 파일을 정제하고, MySQL에 Sheet별 Table로 저장
 
 ---
 

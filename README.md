@@ -2,8 +2,8 @@
 
 -----
 
-- Collect the latest daily data of stocks with Kiwoom API, create a schema in MySQL and save it as a table
 * 키움증권 API로 종목의 최신 일별 데이터를 수집하고 MySQL에 Schema 생성 및 Table로 저장
+- Collect the latest daily data of stocks with Kiwoom API, create a schema in MySQL and save it as a table
 
 -----
 

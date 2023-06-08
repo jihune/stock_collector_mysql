@@ -13,3 +13,4 @@
 /stock/extract_data/__pycache__/
 /stock/extract_data/basic_factor_data/__pycache__/
 /stock/filter_data/__pycache__/
+/stock/crawling_data/net_worth_roe_cache.pkl

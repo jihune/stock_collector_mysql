@@ -1,0 +1,15 @@
+
+/.idea/
+/docs_cache/
+/result_xlsx/
+
+/config/api_key.py
+
+/config/__pycache__/
+/export_data/__pycache__/
+/library/__pycache__/
+/stock/__pycache__/
+/stock/crawling_data/__pycache__/
+/stock/extract_data/__pycache__/
+/stock/extract_data/basic_factor_data/__pycache__/
+/stock/filter_data/__pycache__/

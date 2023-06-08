@@ -67,6 +67,7 @@ def craw_and_process(choice=None):
 
     start = time.time()
     sleep_time = 60
+    try_count  = 0
 
     while True:
         try:
@@ -140,14 +141,18 @@ def craw_and_process(choice=None):
 
         except Exception as e:
             print(f"현재시간: {datetime.datetime.now()}")
-            print(f"에러 발생으로 {sleep_time/60}분 만큼 대기 시작: {e}")
+            print(f"크롤링 반복횟수: {try_count}회 (0회일 경우 반복없이 크롤링 성공)")
+            print(f"에러 발생으로 {int(sleep_time / 60)}분 만큼 대기 시작: {e}")
             time.sleep(sleep_time)
+            try_count += 1
             sleep_time *= 2
 
     end = time.time()
     sec = (end - start)
 
     result_list = str(datetime.timedelta(seconds=sec)).split(".")
+    print(f"현재시간: {datetime.datetime.now()}")
+    print(f"크롤링 반복횟수: {try_count}회 (0회일 경우 반복없이 크롤링 성공)")
     print(f"Total extracting time: {result_list[0]} ---------------------")
 
 if __name__ == "__main__":

@@ -1,0 +1,6 @@
+
+/.idea/
+
+/library/db_config.py
+
+/library/__pycache__/

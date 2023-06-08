@@ -1,7 +1,6 @@
 import array
 import pandas as pd
 
-
 class ExportToData:
     def __init__(self):
         self.pandas = pd

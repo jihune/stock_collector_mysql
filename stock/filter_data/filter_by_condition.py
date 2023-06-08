@@ -1,7 +1,5 @@
 from array import array
-
 import pandas as pd
-
 
 def filtering_data_that_specific_data(code_list: array, data: pd.DataFrame):
     """
@@ -66,11 +64,6 @@ def filtering_data_that_market_index_krx300(data: pd.DataFrame):
     merged_data = data.merge(krx300_data, left_on='종목코드', right_on='종목코드', how='inner')
 
     return merged_data
-
-def filtering_data_that_market_index_test(data: pd.DataFrame):
-    filtered_data = data[data['종목코드'] == '005930']
-
-    return filtered_data
 
 def filtering_low_per(sheet_name, df_copied: pd.DataFrame, all_data=False):
     """
@@ -590,8 +583,8 @@ def filtering_s_rim_disparity_and_high_nav(sheet_name, df: pd.DataFrame):
 
 
 def drop_column(df: pd.DataFrame):
-    # 이 함수는 사용자가 입력한 값과는 무관하게 시장유형 관계없이 전종목 S-RIM 데이터를 받아오는 곳에서
-    # 크롤링한 데이터를 DataFrame에서 Drop하는 함수이다.
+
+    # S-RIM 데이터 수집시 Drop할 주식들
 
     # 스팩 주식 드랍
     df.drop(

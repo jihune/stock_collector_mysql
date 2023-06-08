@@ -1,9 +1,10 @@
 ### all_craw_and_process_dart
 
+* Receive and process stock data using the DART OpenAPI key and convert it into an Excel file
+
 -----
 
 * DART OpenAPI 키를 사용해서 주식 Data를 받고 가공하여 엑셀 파일로 변환
-* Receive and process stock data using the DART OpenAPI key and convert it into an Excel file
 
 -----
 

@@ -18,7 +18,26 @@ def make_file_path(category):
 
     return file_path
 
-def export_data(category, raw_data, extracted_data):
+
+def simple_export_data(raw_data):
+    exporter = ExportToData()
+
+    file_path = make_file_path("KOSPI_KOSDAQ")
+
+    exporter.export_to_excel_with_many_sheets(
+        file_path,
+        [
+            filter_data.filtering_low_per("ALL_DATA_저PER", raw_data.copy(), True),
+            filter_data.filtering_low_pbr_and_per("ALL_DATA_저PBR_저PER", 1.0, 10, raw_data.copy(), True),
+            filter_data.filtering_s_rim_disparity_all_data("S-RIM ALL_DATA", raw_data.copy()),
+            filter_data.filtering_high_div("고배당률_리스트", raw_data.copy()),
+
+            ("RAW_Data", raw_data)
+        ]
+    )
+
+
+def complex_export_data(category, raw_data, extracted_data):
     exporter = ExportToData()
 
     file_path = make_file_path(category)

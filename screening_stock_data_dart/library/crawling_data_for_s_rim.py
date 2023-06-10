@@ -105,7 +105,7 @@ def update_and_export_srim_data():
     # Delete cache file after exporting to Excel
     if os.path.isfile(cache_file_path):
         os.remove(cache_file_path)
-        print("캐시 파일 삭제")
+        print("사용 완료된 캐시 파일 삭제")
 
     end = time.time()
     sec = (end - start)

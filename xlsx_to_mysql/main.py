@@ -49,17 +49,8 @@ if __name__ == "__main__":
         # 중복된 행을 제거합니다.
         sheet_data = sheet_data.loc[:, ~sheet_data.columns.duplicated(keep='first')]
 
-        # NaN, inf 값을 0으로 대체합니다.
-        sheet_data = sheet_data.fillna(0)
-        sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
-
         # 종목코드 앞에 005930 일때 00이 날아가는 문제를 해결합니다.
         sheet_data['종목코드'] = sheet_data.종목코드.map('{:06d}'.format)
-
-        # ROE가 반대로 하락하는 기업이라면 어떡할까요? 일단 S-RIM 공식을 사용하는 기업은 ROE가 지속적으로 하락하는 기업을 제외합니다.
-        # 'average_roe' 열이 음수인 경우 'S_RIM', 'S_RIM_10', 'S_RIM_20' 열의 값을 모두 0으로 변경합니다.
-        if 'average_roe' in sheet_data.columns:
-            sheet_data.loc[sheet_data['average_roe'] < 0, ['S_RIM', 'S_RIM_10', 'S_RIM_20']] = 0
 
         # Rename columns if they exist
         # Convert columns to integer type
@@ -68,8 +59,13 @@ if __name__ == "__main__":
             sheet_data.rename(columns={'S-RIM -10%': 'S_RIM_10'}, inplace=True)
             sheet_data.rename(columns={'S-RIM -20%': 'S_RIM_20'}, inplace=True)
 
-            # ROE 값이 BBB- 회사채 수익률(할인율)보다 작다면, 굳이 투자할 이유가 없다고 언급합니다.
-            # 이 때는 경우에 따라 초과이익 지속 시에 해당하는 적정주가만 참조합니다.
+            # ROE가 반대로 하락하는 기업이라면 어떡할까요? 일단 S-RIM 공식을 사용하는 기업은 ROE가 지속적으로 하락하는 기업을 제외합니다.
+            # 'average_roe' 열이 음수인 경우 'S_RIM', 'S_RIM_10', 'S_RIM_20' 열의 값을 모두 0으로 변경합니다.
+            sheet_data.loc[sheet_data['average_roe'] < 0, 'S_RIM'] = 0
+            sheet_data.loc[sheet_data['average_roe'] < 0, 'S_RIM_10'] = 0
+            sheet_data.loc[sheet_data['average_roe'] < 0, 'S_RIM_20'] = 0
+
+            # BBB- 금리보다 기업의 초과이익이 낮은경우 적정주가 산출이 이상하게 됩니다.
             sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_10'], 'S_RIM_10'] = sheet_data['S_RIM']
             sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_20'], 'S_RIM_20'] = sheet_data['S_RIM']
 
@@ -78,8 +74,12 @@ if __name__ == "__main__":
             sheet_data['S_RIM_20'] = sheet_data['S_RIM_20'].astype(int)
 
         if 'S-RIM 괴리율' in sheet_data.columns:
-            sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_20_difr'}, inplace=True)
-            sheet_data.loc[sheet_data['average_roe'] < 0, ['S_RIM_20_difr']] = 0
+            sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_difr'}, inplace=True)
+            sheet_data.loc[:, 'S_RIM_difr'] = sheet_data['종가'] / sheet_data['S_RIM'] * 100
+
+        # NaN, inf 값을 0으로 대체합니다.
+        sheet_data = sheet_data.fillna(0)
+        sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
 
         # 데이터를 MySQL 테이블로 삽입합니다.
         sheet_data.to_sql(table_name, con=engine, if_exists='replace', index=False)

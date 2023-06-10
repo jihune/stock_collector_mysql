@@ -1,4 +1,7 @@
-## xlsx_to_mysql
+
+### xlsx_to_mysql
+
+-----
 
 * 대화형 선택상자로 1개 혹은 여러 개의 *.xlsx 파일을 선택한 뒤 병합 및 중복 제거
 * 읽어들인 엑셀파일들의 Sheet들을 MySQL DB Schema내에 각각의 Table로 저장

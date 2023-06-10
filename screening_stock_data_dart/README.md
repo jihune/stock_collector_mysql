@@ -25,4 +25,4 @@
    * 현재 분기 재무제표 기반 크롤링 시 대상으로 KOSPI200, KOSDAQ150 지수만 크롤링 해야 합니다.
    * S-RIM 적정주가 계산의 산출근거가 되는 Data는 1년에 1번만 갱신하면 됩니다.
 
-5. 결과물을 MySQL로 전송하기 위해 xlsx_to_mysql를 만들었으니 같이 사용하시면 좋습니다.
+5. 결과물을 MySQL로 전송하기 위해 [xlsx_to_mysql](https://github.com/jihune/xlsx_to_mysql)를 만들었으니 같이 사용하시면 좋습니다.

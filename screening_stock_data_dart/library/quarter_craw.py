@@ -2,7 +2,7 @@ import time
 import stock.filter_data as filter_data
 from stock.extract_data.extract import Extract
 import datetime
-from library.many_sheets_export import export_data, make_file_path
+from library.many_sheets_export import complex_export_data, make_file_path
 from export_data.export_to_excel import ExportToData
 
 def filterging_data(choice, data):
@@ -47,14 +47,14 @@ def craw_and_process(choice=None):
                     years,
                     filterging_data(1, kospi_kosdaq_data)
                 )
-                export_data("소형주", kospi_kosdaq_data, extracted_data)
+                complex_export_data("소형주", kospi_kosdaq_data, extracted_data)
             elif choice == 2:
                 print("대형주 스크래핑을 시작합니다 -------")
                 extracted_data = extractor.extract_finance_data(
                     years,
                     filterging_data(2, kospi_kosdaq_data)
                 )
-                export_data("대형주", kospi_kosdaq_data, extracted_data)
+                complex_export_data("대형주", kospi_kosdaq_data, extracted_data)
 
             elif choice == 3:
                 print("KOSPI200 구성종목 스크래핑을 시작합니다 -------")
@@ -62,7 +62,7 @@ def craw_and_process(choice=None):
                     years,
                     filterging_data(3, kospi_kosdaq_data)
                 )
-                export_data("KOSPI200", kospi_kosdaq_data, extracted_data)
+                complex_export_data("KOSPI200", kospi_kosdaq_data, extracted_data)
 
             elif choice == 4:
                 print("KOSDAQ150 구성종목 스크래핑을 시작합니다 -------")
@@ -70,7 +70,7 @@ def craw_and_process(choice=None):
                     years,
                     filterging_data(4, kospi_kosdaq_data)
                 )
-                export_data("KOSDAQ150", kospi_kosdaq_data, extracted_data)
+                complex_export_data("KOSDAQ150", kospi_kosdaq_data, extracted_data)
 
             elif choice == 5:
                 print("KRX300 구성종목 스크래핑을 시작합니다 -------")
@@ -78,7 +78,7 @@ def craw_and_process(choice=None):
                     years,
                     filterging_data(5, kospi_kosdaq_data)
                 )
-                export_data("KRX300", kospi_kosdaq_data, extracted_data)
+                complex_export_data("KRX300", kospi_kosdaq_data, extracted_data)
 
             elif choice == 6:
                 print("TEST로 삼성전자의 스크래핑을 시작합니다 -------")
@@ -90,7 +90,7 @@ def craw_and_process(choice=None):
                         kospi_kosdaq_data
                     )
                 )
-                export_data("TEST_1", kospi_kosdaq_data, extracted_data)
+                complex_export_data("TEST_1", kospi_kosdaq_data, extracted_data)
 
                 file_path = make_file_path("TEST_2")
 
@@ -121,5 +121,5 @@ def craw_and_process(choice=None):
 
     result_list = str(datetime.timedelta(seconds=sec)).split(".")
     print(f"\n현재시간 => {datetime.datetime.now()}")
-    print(f"크롤링 반복횟수: {try_count}회 (0회일 경우 반복 없이 크롤링 성공)")
+    print(f"크롤링 반복횟수: {try_count}회 (0회일 경우 에러 없이 크롤링 성공)")
     print(f"Total extracting time: {result_list[0]} ---------------------")

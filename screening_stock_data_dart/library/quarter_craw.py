@@ -18,12 +18,16 @@ def filterging_data(choice, data):
         return filter_data.filtering_data_that_market_index_krx300(data)
 
 def craw_and_process(choice=None):
+
+    start = time.time()
+
     this_year = datetime.datetime.now().year
     years = [this_year - 2, this_year - 1, this_year]
 
-    start = time.time()
     sleep_time = 60
     try_count = 0
+
+    extractor = Extract()
 
     while True:
         try:
@@ -32,14 +36,10 @@ def craw_and_process(choice=None):
                     input("소형주: 1 / 대형주: 2 / KOSPI200: 3 "
                           "/ KOSDAQ150 : 4 / KRX300 : 5 / TEST: 6 => "))
 
-            extractor = Extract()
+            print("--------------")
 
             # calling kospi and kosdaq data using pykrx and OpenFinanceReader
             kospi_kosdaq_data = extractor.get_data()
-
-            print("--------------")
-
-            # extract and calculating finance data recent 3 years data
 
             if choice == 1:
                 print("소형주 스크래핑을 시작합니다 -------")

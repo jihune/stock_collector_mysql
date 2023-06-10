@@ -10,14 +10,15 @@ def craw_and_process():
     try_count = 0
 
     while True:
+
+        print("--------------")
+        print("스크래핑을 시작합니다 -------")
+
         try:
             extractor = Extract()
 
             # calling kospi and kosdaq data using pykrx and OpenFinanceReader
             kospi_kosdaq_data = extractor.get_data()
-
-            print("--------------")
-            print("스크래핑을 시작합니다 -------")
 
             simple_export_data(kospi_kosdaq_data)
 

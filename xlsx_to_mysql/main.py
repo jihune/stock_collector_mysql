@@ -7,6 +7,7 @@ from tkinter.filedialog import askopenfilenames
 import numpy as np
 
 if __name__ == "__main__":
+
     root = Tk()
     root.withdraw()
     file_paths = askopenfilenames(title="Select Excel Files", filetypes=[("Excel Files", "*.xlsx")])
@@ -15,7 +16,7 @@ if __name__ == "__main__":
 
     if not file_paths:
         print("파일 선택이 취소되었습니다.")
-        exit()
+        exit(1)
 
     # pandas를 사용하여 XLSX 파일에서 데이터를 읽습니다.
     xlsx_data = {}
@@ -42,26 +43,48 @@ if __name__ == "__main__":
         # 테이블 이름을 유효한 형식으로 변환합니다.
         table_name = sheet_name.replace(" ", "_")
 
-        # 0번째 열을 삭제합니다.
+        # 0번째 열인 Index로 되어있는 열을 삭제합니다.
         sheet_data = sheet_data.iloc[:, 1:]
 
-        # 중복된 열을 제거합니다.
-        sheet_data = sheet_data.loc[:, ~sheet_data.columns.duplicated()]
+        # 중복된 행을 제거합니다.
+        sheet_data = sheet_data.loc[:, ~sheet_data.columns.duplicated(keep='first')]
 
-        # NaN 값을 0으로 대체합니다.
+        # NaN, inf 값을 0으로 대체합니다.
         sheet_data = sheet_data.fillna(0)
-
-        # Replace 'inf' values with 0
         sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
 
-        # '종목번호' 열을 문자열로 변환합니다.
-        if '종목번호' in sheet_data.columns:
-            sheet_data['종목번호'] = sheet_data['종목번호'].astype(str)
+        # 종목코드 앞에 005930 일때 00이 날아가는 문제를 해결합니다.
+        sheet_data['종목코드'] = sheet_data.종목코드.map('{:06d}'.format)
+
+        # ROE가 반대로 하락하는 기업이라면 어떡할까요? 일단 S-RIM 공식을 사용하는 기업은 ROE가 지속적으로 하락하는 기업을 제외합니다.
+        # 'average_roe' 열이 음수인 경우 'S_RIM', 'S_RIM_10', 'S_RIM_20' 열의 값을 모두 0으로 변경합니다.
+        if 'average_roe' in sheet_data.columns:
+            sheet_data.loc[sheet_data['average_roe'] < 0, ['S_RIM', 'S_RIM_10', 'S_RIM_20']] = 0
+
+        # Rename columns if they exist
+        # Convert columns to integer type
+        if 'S-RIM 적정주가' in sheet_data.columns:
+            sheet_data.rename(columns={'S-RIM 적정주가': 'S_RIM'}, inplace=True)
+            sheet_data.rename(columns={'S-RIM -10%': 'S_RIM_10'}, inplace=True)
+            sheet_data.rename(columns={'S-RIM -20%': 'S_RIM_20'}, inplace=True)
+
+            # ROE 값이 BBB- 회사채 수익률(할인율)보다 작다면, 굳이 투자할 이유가 없다고 언급합니다.
+            # 이 때는 경우에 따라 초과이익 지속 시에 해당하는 적정주가만 참조합니다.
+            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_10'], 'S_RIM_10'] = sheet_data['S_RIM']
+            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_20'], 'S_RIM_20'] = sheet_data['S_RIM']
+
+            sheet_data['S_RIM'] = sheet_data['S_RIM'].astype(int)
+            sheet_data['S_RIM_10'] = sheet_data['S_RIM_10'].astype(int)
+            sheet_data['S_RIM_20'] = sheet_data['S_RIM_20'].astype(int)
+
+        if 'S-RIM 괴리율' in sheet_data.columns:
+            sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_20_difr'}, inplace=True)
+            sheet_data.loc[sheet_data['average_roe'] < 0, ['S_RIM_20_difr']] = 0
 
         # 데이터를 MySQL 테이블로 삽입합니다.
         sheet_data.to_sql(table_name, con=engine, if_exists='replace', index=False)
 
-    print(f"DB에 Table 저장 성공")
+    print(f"xlsx의 Sheet들을 MySQl DB에 각 Table로 저장 성공")
 
     # 변경 사항을 커밋하고 engine 종료.
     engine.dispose()

@@ -17,13 +17,16 @@ if __name__ == "__main__":
     elif choice == 3:
 
         # S-RIM 적정주가를 계산해서 엑셀 파일로 Export 하는 함수
-        # 적정주가는 신규상장 종목을 찾을 때 외에는
-        # 어차피 3년간 재무제표 기반이므로 1년에 1회만 업데이트하면 된다.
-        # 재무제표 상 초과이익 계산시 BBB- 채권의 금리가 필요하나, 상수값 10.0으로 고정
+        # 적정주가는 3년간의 연간 재무제표를 분석하므로 1년에 1회만 업데이트하면 된다.
 
-        # 23년 6월 9일 마지막 갱신
+        # 단, 초과이익 계산시 BBB- 5년만기 채권의 금리가 필요하며, 이 금리는 변동된다.
+        # https://www.kisrating.co.kr/ratingsStatistics/statics_spread.do
+        # 위 링크에서 구할 수 있으며 아래 함수 매개변수에 넣어주면 된다.
 
-        update_and_export_srim_data()
+        # net_worth_and_roe_list_for_s_rim.xlsx
+        # 23년 6월 11일 마지막 갱신
+
+        update_and_export_srim_data(10.94)
 
     else:
         exit(-1)

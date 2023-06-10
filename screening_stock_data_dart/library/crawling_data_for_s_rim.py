@@ -18,7 +18,7 @@ def calculate_company_value(net_worth, roe, k, discount_roe=1.0):
     return value
 
 
-def update_and_export_srim_data():
+def update_and_export_srim_data(BBB_5):
 
     start = time.time()
 
@@ -81,7 +81,7 @@ def update_and_export_srim_data():
             pd.to_pickle(cache_data, cache_file_path)
 
         for discount_roe in require_rate_of_return:
-            s_rim_values.append(calculate_company_value(net_worth, roe, 10, discount_roe))
+            s_rim_values.append(calculate_company_value(net_worth, roe, BBB_5, discount_roe))
 
         net_worth_and_roe_list = net_worth_and_roe_list.copy()
 

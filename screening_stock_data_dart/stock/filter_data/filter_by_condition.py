@@ -551,7 +551,8 @@ def filtering_value_and_profit_momentum(sheet_name, df: pd.DataFrame):
 
 
 def filtering_s_rim_disparity_all_data(sheet_name, df: pd.DataFrame):
-    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"]
+
+    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
 
     return (sheet_name,
             df.sort_values(by=["S-RIM 괴리율"], ascending=False).reset_index(drop=True)

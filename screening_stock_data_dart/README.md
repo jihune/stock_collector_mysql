@@ -1,8 +1,6 @@
 
 ## screening_stock_data_dart
 
------
-
 * DART OpenAPI 키를 사용해서 주식 종목별 Data를 받고
 * 여러 조건들로 가공한 Data를 Sheet 별로 나누어 저장하고 엑셀 파일로 Export
 - Receive data by stock item using DART OpenAPI key

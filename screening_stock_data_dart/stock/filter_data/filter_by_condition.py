@@ -593,7 +593,7 @@ def drop_column(df: pd.DataFrame):
     )
     # 우선주 드랍
     df.drop(
-        df[df["종목명"].str.endswith(("우", "우B", "우C", "(전환)"))].index,
+        df[df["종목명"].str.endswith(("우", "우B", "우C", "(전환)", "리츠"))].index,
         inplace=True
     )
 

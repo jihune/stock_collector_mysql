@@ -1,4 +1,7 @@
-## finance_craw_fnguide
+
+### finance_craw_fnguide
+
+-----
 
 * FnGuide 사이트에서 주식 종목의 재무제표 데이터를 수집, MySQL에 Table로 저장
 - Collect financial statement data of stock items from the FnGuide site and save them as tables in MySQL

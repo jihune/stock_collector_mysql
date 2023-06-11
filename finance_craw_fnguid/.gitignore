@@ -4,3 +4,4 @@
 /library/__pycache__/
 
 /library/db_config.py
+/fnguide_cache.pkl

@@ -49,8 +49,15 @@ if __name__ == "__main__":
         # 중복된 행을 제거합니다.
         sheet_data = sheet_data.loc[:, ~sheet_data.columns.duplicated(keep='first')]
 
+        # NaN, inf 값을 0으로 대체합니다.
+        sheet_data = sheet_data.fillna(0)
+        sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
+
+        # 종목코드에 숫자가 아닌 값이 들어간 행 드롭
+        sheet_data = sheet_data[pd.to_numeric(sheet_data['종목코드'], errors='coerce').notna()]
+
         # 종목코드 앞에 005930 일때 00이 날아가는 문제를 해결합니다.
-        sheet_data['종목코드'] = sheet_data.종목코드.map('{:06d}'.format)
+        sheet_data['종목코드'] = sheet_data.종목코드.map('{:06}'.format)
 
         # Rename columns if they exist
         # Convert columns to integer type
@@ -76,10 +83,7 @@ if __name__ == "__main__":
         if 'S-RIM 괴리율' in sheet_data.columns:
             sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_difr'}, inplace=True)
             sheet_data.loc[:, 'S_RIM_difr'] = sheet_data['종가'] / sheet_data['S_RIM'] * 100
-
-        # NaN, inf 값을 0으로 대체합니다.
-        sheet_data = sheet_data.fillna(0)
-        sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
+            sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
 
         # 데이터를 MySQL 테이블로 삽입합니다.
         sheet_data.to_sql(table_name, con=engine, if_exists='replace', index=False)

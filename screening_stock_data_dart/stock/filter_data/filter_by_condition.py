@@ -585,18 +585,23 @@ def filtering_s_rim_disparity_and_high_nav(sheet_name, df: pd.DataFrame):
 
 def drop_column(df: pd.DataFrame):
 
-    # S-RIM 데이터 수집시 Drop할 주식들
+    # 데이터 수집시 Drop할 주식들
 
     # 스팩 주식 드랍
     df.drop(
-        df[df["종목명"].str.contains("스팩, 리츠")].index,
+        df[df["종목명"].str.contains("스팩")].index,
         inplace=True
     )
-    # 우선주 드랍
+
+    # 우선주, 리츠 드랍
     df.drop(
-        df[df["종목명"].str.endswith(("우", "우B", "우C", "(전환)"))].index,
+        df[df["종목명"].str.endswith(("1우", "2우", "우B", "우C", "(전환)", "리츠"))].index,
         inplace=True
     )
+
+    # 2차적으로 우선주 삭제
+    if '업종' in df.columns:
+        df = df.drop(df[df['업종'].isna()].index)
 
     return df
 

@@ -1,17 +1,18 @@
 import requests as re
+import os
+import pandas as pd
 from bs4 import BeautifulSoup
 from pandas import DataFrame
 from sqlalchemy import create_engine
 import time
+import datetime
 
 # cf = DB 정보를 담은 mysql-config 파일
 from . import db_config as cf
 from . import kind_stock_list
 from . import my_sql_modify
 
-def get_stock_finance_table():
-    # 사용자 입력 받기
-    ticker = input("회사명 또는 종목코드를 입력하세요 => ")
+def get_stock_finance_table(ticker):
 
     # 종목 리스트를 KIND 사이트에서 받아옴
     tickers = kind_stock_list.collect_stock_list()
@@ -134,6 +135,9 @@ def get_many_stock_finance_table():
     # 종목 리스트를 KIND 사이트에서 받아옴
     tickers = kind_stock_list.collect_many_stock_list()
 
+    sleep_time = 60
+    try_count = 0
+
     # DB 저장 에러 발생 수 카운트
     err_count = 0
     err_tickers = []
@@ -141,94 +145,135 @@ def get_many_stock_finance_table():
     # 현재 몇번째 종목인지 인덱스
     index_ = 0
 
-    for code in tickers.keys():
-
-        index_ += 1
-        print(f"\n현재 정보 수집중인 {index_}번째 종목: {tickers[code]}")
-
-        ''' 경로 탐색'''
-        url = re.get('http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A%s' % (code))
-        url = url.content
-
-        html = BeautifulSoup(url, 'html.parser')
-        body = html.find('body')
+    while True:
 
         try:
-            fn_body = body.find('div', {'class': 'fng_body asp_body'})
-            ur_table = fn_body.find('div', {'id': 'div15'})
-            table = ur_table.find('div', {'id': 'highlight_D_Y'})
+            cache_file_path = "./fnguide_cache.pkl"
 
-            tbody = table.find('tbody')
+            cache_data = {}
 
-            tr = tbody.find_all('tr')
+            if os.path.isfile(cache_file_path):
+                try:
+                    cache_data = pd.read_pickle(cache_file_path)
+                except:
+                    cache_data = {}
 
-            finance_table = DataFrame()
+            # 중간에 끊긴 경우 캐시 데이터를 활용하여 이어서 크롤링
+            if cache_data:
+                last_ticker = cache_data['ticker']
+                tickers = {k: v for k, v in tickers.items() if k >= last_ticker}
+                index_ -= 1
 
-        except:
-            print('에러가 발생했습니다.')
-            print('해당 자료를 건너뜁니다.')
-            continue
+            for code in tickers.keys():
 
-        for i in tr:
+                index_ += 1
+                print(f"\n현재 정보 수집중인 {index_}번째 종목: {tickers[code]}")
 
-            ''' 자료 항목 가져오기'''
-            category = i.find('span', {'class': 'txt_acd'})
+                ''' 경로 탐색'''
+                url = re.get('http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode=A%s' % (code))
+                url = url.content
 
-            if category == None:
-                category = i.find('th')
-
-            category = category.text.strip()
-
-            '''값 가져오기'''
-            value_list = []
-
-            j = i.find_all('td', {'class': 'r'})
-
-            for value in j:
-                temp = value.text.replace(',', '').strip()
+                html = BeautifulSoup(url, 'html.parser')
+                body = html.find('body')
 
                 try:
-                    temp = float(temp)
-                    value_list.append(temp)
+                    fn_body = body.find('div', {'class': 'fng_body asp_body'})
+                    ur_table = fn_body.find('div', {'id': 'div15'})
+                    table = ur_table.find('div', {'id': 'highlight_D_Y'})
+
+                    tbody = table.find('tbody')
+
+                    tr = tbody.find_all('tr')
+
+                    finance_table = DataFrame()
+
                 except:
-                    value_list.append(0)
+                    print('에러가 발생했습니다.')
+                    print('해당 자료를 건너뜁니다.')
+                    continue
 
-            finance_table['%s' % (category)] = value_list
+                for i in tr:
 
-            ''' 기간 가져오기 '''
+                    ''' 자료 항목 가져오기'''
+                    category = i.find('span', {'class': 'txt_acd'})
 
-            thead = table.find('thead')
-            tr_2 = thead.find('tr', {'class': 'td_gapcolor2'}).find_all('th')
+                    if category == None:
+                        category = i.find('th')
 
-            year_list = []
+                    category = category.text.strip()
 
-            for i in tr_2:
+                    '''값 가져오기'''
+                    value_list = []
+
+                    j = i.find_all('td', {'class': 'r'})
+
+                    for value in j:
+                        temp = value.text.replace(',', '').strip()
+
+                        try:
+                            temp = float(temp)
+                            value_list.append(temp)
+                        except:
+                            value_list.append(0)
+
+                    finance_table['%s' % (category)] = value_list
+
+                    ''' 기간 가져오기 '''
+
+                    thead = table.find('thead')
+                    tr_2 = thead.find('tr', {'class': 'td_gapcolor2'}).find_all('th')
+
+                    year_list = []
+
+                    for i in tr_2:
+                        try:
+                            temp_year = i.find('span', {'class': 'txt_acd'}).text
+                        except:
+                            temp_year = i.text
+
+                        year_list.append(temp_year)
+
+                    finance_table.index = year_list
+
+                finance_table = finance_table.T
+                finance_table.insert(0, 'IFRS', finance_table.index)
+
                 try:
-                    temp_year = i.find('span', {'class': 'txt_acd'}).text
-                except:
-                    temp_year = i.text
+                    ''' DB에 저장'''
+                    finance_table.to_sql(name=tickers[code], con=engine, if_exists='replace', index=False)
+                    print(f"{tickers[code]} 종목의 재무제표를 성공적으로 저장하였습니다.")
+                    time.sleep(0.3)
+                except Exception as e:
+                    err_count += 1
+                    print(f"{tickers[code]} 재무제표 저장 중 에러 발생: {e}")
+                    print("10초간 크롤링 대기")
+                    err_tickers.append(tickers[code])
+                    time.sleep(10)
 
-                year_list.append(temp_year)
+                # 중간에 끊긴 경우 캐시 데이터 갱신
+                cache_data['ticker'] = code
+                pd.to_pickle(cache_data, cache_file_path)
 
-            finance_table.index = year_list
+            engine.dispose()
 
-        finance_table = finance_table.T
-        finance_table.insert(0, 'IFRS', finance_table.index)
+            print('\nDB 저장 과정에서 오류가 %s번 발생하였습니다.' % (err_count))
+            if err_tickers:
+                print(f"저장 과정에서 오류가 발생한 종목: {err_tickers}")
 
-        try:
-            ''' DB에 저장'''
-            finance_table.to_sql(name=tickers[code], con=engine, if_exists='replace', index=False)
-            print(f"{tickers[code]} 종목의 재무제표를 성공적으로 저장하였습니다.")
-            time.sleep(0.3)
+            # 크롤링이 완료되면 캐시 파일 삭제
+            if os.path.isfile(cache_file_path):
+                os.remove(cache_file_path)
+
+            break
+
         except Exception as e:
-            err_count += 1
-            print(f"{tickers[code]} 재무제표 저장 중 에러 발생: {e}")
-            print("10초간 크롤링 대기")
-            err_tickers.append(tickers[code])
-            time.sleep(10)
+            print(f"현재시간 => {datetime.datetime.now()}")
+            print(f"크롤링 반복횟수: {try_count}회 (0회가 최초 반복의 시작점)")
+            print(f"에러 발생으로 {int(sleep_time / 60)}분 만큼 대기 시작: {e}")
+            time.sleep(sleep_time)
+            try_count += 1
+            sleep_time *= 2
 
-    engine.dispose()
 
-    print('\nDB 저장 과정에서 오류가 %s번 발생하였습니다.' % (err_count))
-    if err_tickers:
-        print(f"저장 과정에서 오류가 발생한 종목: {err_tickers}")
+    print(f"\n현재시간 => {datetime.datetime.now()}")
+    print(f"크롤링 반복횟수: {try_count}회 (0회일 경우 에러 없이 크롤링 성공)")

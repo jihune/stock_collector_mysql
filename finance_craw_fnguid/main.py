@@ -5,7 +5,8 @@ if __name__ == "__main__":
     user_chice = input("특정 종목의 재무제표 수집 : 1 / 모든 종목의 재무제표 수집 : 2 => ")
 
     if user_chice == '1':
-        fnguide_collector.get_stock_finance_table()
+        user_input = input("회사명 또는 종목코드를 입력하세요 => ")
+        fnguide_collector.get_stock_finance_table(user_input)
 
     elif user_chice == '2':
         fnguide_collector.get_many_stock_finance_table()

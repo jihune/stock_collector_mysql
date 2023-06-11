@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # 데이터를 MySQL 테이블에 삽입합니다.
     for sheet_name, sheet_data in xlsx_data.items():
         # 테이블 이름을 유효한 형식으로 변환합니다.
-        table_name = sheet_name.replace(" ", "_")
+        table_name = sheet_name.replace(" ", "_").replace("-", "_")
 
         # 0번째 열인 Index로 되어있는 열을 삭제합니다.
         sheet_data = sheet_data.iloc[:, 1:]

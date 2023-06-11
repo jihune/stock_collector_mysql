@@ -26,13 +26,13 @@ def collect_many_stock_list():
 
     # 스팩 주식 드랍
     data.drop(
-        data[data["종목명"].str.contains("스팩")].index,
+        data[data["회사명"].str.contains("스팩")].index,
         inplace=True
     )
 
     # 우선주, 리츠 드랍
     data.drop(
-        data[data["종목명"].str.endswith(("1우", "2우", "우B", "우C", "(전환)", "리츠"))].index,
+        data[data["회사명"].str.endswith(("1우", "2우", "우B", "우C", "(전환)", "리츠"))].index,
         inplace=True
     )
 
@@ -42,7 +42,6 @@ def collect_many_stock_list():
     code_list = data['종목코드'].tolist()
     name_list = data['회사명'].tolist()
 
-    # KOSPI200, KOSDAQ, KRX300 상장종목 전체
     tickers = dict(list(zip(code_list, name_list)))
 
     code_list_last_index = len(code_list) - 1

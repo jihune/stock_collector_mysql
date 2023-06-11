@@ -24,13 +24,15 @@ def collect_many_stock_list():
     # 중복 행 제거
     data.drop_duplicates(inplace=True)
 
+    # 스팩 주식 드랍
     data.drop(
-        data[data["회사명"].str.contains("스팩, 리츠")].index,
+        data[data["종목명"].str.contains("스팩")].index,
         inplace=True
     )
-    # 우선주 드랍
+
+    # 우선주, 리츠 드랍
     data.drop(
-        data[data["회사명"].str.endswith(("우", "우B", "우C", "(전환)"))].index,
+        data[data["종목명"].str.endswith(("1우", "2우", "우B", "우C", "(전환)", "리츠"))].index,
         inplace=True
     )
 

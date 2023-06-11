@@ -15,15 +15,24 @@ def collect_stock_list():
     return tickers
 
 def collect_many_stock_list():
-    kospi200_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=06', header=0)[0]
-    kosdaq150_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=16', header=0)[0]
-    krx300_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=17', header=0)[0]
+    kospi_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&marketType=stockMkt', header=0)[0]
+    kosdaq_data = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&&marketType=kosdaqMkt', header=0)[0]
 
     # 합치기
-    data = pd.concat([kospi200_data, kosdaq150_data, krx300_data])
+    data = pd.concat([kospi_data, kosdaq_data])
 
     # 중복 행 제거
     data.drop_duplicates(inplace=True)
+
+    data.drop(
+        data[data["회사명"].str.contains("스팩, 리츠")].index,
+        inplace=True
+    )
+    # 우선주 드랍
+    data.drop(
+        data[data["회사명"].str.endswith(("우", "우B", "우C", "(전환)"))].index,
+        inplace=True
+    )
 
     data['종목코드'] = data.종목코드.map('{:06d}'.format)
     data = data[['종목코드', '회사명']]

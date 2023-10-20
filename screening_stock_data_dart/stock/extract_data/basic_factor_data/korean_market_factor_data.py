@@ -58,9 +58,16 @@ class KoreanMarketFactorData:
     def __get_korean_stock_ticker_and_name(self, date, market):
         stock_list = pd.DataFrame({'종목코드': self.stock.get_market_ticker_list(date, market=market)})
         stock_list['종목명'] = stock_list['종목코드'].map(lambda x: stock.get_market_ticker_name(x))
-        stock_list['업종'] = stock_list['종목명'].map(lambda x: self.fdr_data[self.fdr_data["Name"] == x]["Sector"].iloc[0])
+        stock_list['업종'] = stock_list['종목명'].map(lambda x: self.__get_sector_by_name(x))
 
         return stock_list
+
+    def __get_sector_by_name(self, name):
+        sector = self.fdr_data[self.fdr_data['Name'] == name]['Sector']
+        if not sector.empty:
+            return sector.iloc[0]
+        else:
+            return None
 
     def __get_korean_stock_fundamental(self, date, market):
         stock_fud = pd.DataFrame(self.stock.get_market_fundamental(date, market=market))

@@ -82,8 +82,7 @@ if __name__ == "__main__":
 
         if 'S-RIM 괴리율' in sheet_data.columns:
             sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_difr'}, inplace=True)
-            sheet_data.loc[:, 'S_RIM_difr'] = sheet_data['종가'] / sheet_data['S_RIM'] * 100
-            sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
+            # sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
 
         # 데이터를 MySQL 테이블로 삽입합니다.
         sheet_data.to_sql(table_name, con=engine, if_exists='replace', index=False)

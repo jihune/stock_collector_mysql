@@ -24,9 +24,9 @@ if __name__ == "__main__":
         # 위 링크에서 구할 수 있으며 아래 함수 매개변수에 넣어주면 된다.
 
         # net_worth_and_roe_list_for_s_rim.xlsx
-        # 23년 6월 11일 마지막 갱신
+        # 23년 10월 19일 마지막 갱신
 
-        update_and_export_srim_data(10.94)
+        update_and_export_srim_data(11.63) # 2023-10-19
 
     else:
         exit(-1)

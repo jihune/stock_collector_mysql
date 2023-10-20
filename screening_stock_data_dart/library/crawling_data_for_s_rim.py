@@ -1,14 +1,14 @@
 import os
 import datetime
 import time
-import pandas as pd
-import pystocklib.srim as srim
 from export_data import ExportToData
 from stock.extract_data.extract import Extract
+from pystocklib.common import *
 
-
-def calculate_company_value(net_worth, roe, k, discount_roe=1.0):
+def calculate_company_value(net_worth, roe, k, discount_roe=1.0):   # net_worth: 순자산, roe:3년 가중평균 roe, k: BBB- 회사채 금리
     if discount_roe == 1.0:
+        # 기업가치 = 자기자본 + (초과이익 / 할인율)
+        # 초과이익 = 자기자본 x (가중평균 ROE - 할인율)
         value = net_worth + (net_worth * (roe - k)) / k
     else:
         excess_earning = net_worth * (roe - k) * 0.01
@@ -17,6 +17,59 @@ def calculate_company_value(net_worth, roe, k, discount_roe=1.0):
 
     return value
 
+def make_acode(code):
+    '''
+    generate acode such as A005930, A000020
+    :param code:
+    :return: acode
+    '''
+    acode = None
+    if len(code) == 6:
+        acode = 'A' + code
+    elif len(code) == 7:
+        acode = 'A' + code[1:]
+    return acode
+
+def get_net_worth(code):
+    acode = make_acode(code)
+    url = f"http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode={acode}"
+    selector = "#highlight_D_A > table > tbody > tr:nth-child(10) > td:nth-child(4)"
+    ret = get_element_by_css_selector(url, selector)
+
+    # 스크래핑 테스트 시 주석 해제
+    # print(f"지배주주자본: {ret}")
+
+    try:
+        return ret * 100000000
+    except:
+        return 0
+
+def get_roe(code):
+    acode = make_acode(code)
+    url = f"http://comp.fnguide.com/SVO2/ASP/SVD_main.asp?pGB=1&gicode={acode}"
+    selector = "#highlight_D_A > table > tbody > tr:nth-child(18) > td"
+    tags = get_elements_by_css_selector(url, selector)
+    vals = [tag.text for tag in tags]
+
+    roes = []
+    for x in vals:
+        try:
+            x = x.replace(',', '')
+            roes.append(float(x))
+        except:
+            roes.append(0)
+    roe3 = roes[:3]
+
+    # 스크래핑 테스트 시 주석 해제
+    # print(f"최근 3년 ROE: {roe3}")
+
+    # 기존 제작자 이상한 코드 주석처리
+    # if roe3[0] <= roe3[1] <= roe3[2] or roe3[0] >= roe3[1] >= roe3[2]:
+    #     roe = roe3[2]
+    # else:
+    roe = (roe3[0] + roe3[1] * 2 + roe3[2] * 3) / 6     # weighting average
+
+    return roe
 
 def update_and_export_srim_data(BBB_5):
 
@@ -67,12 +120,12 @@ def update_and_export_srim_data(BBB_5):
         else:
             # Fetch data using pystocklib.srim
             try:
-                net_worth = srim.reader.get_net_worth(stock_code)
+                net_worth = get_net_worth(stock_code)
             except:
                 net_worth = 0
 
             try:
-                roe = srim.reader.get_roe(stock_code)
+                roe = get_roe(stock_code)
             except:
                 roe = 0
 

@@ -1,5 +1,6 @@
 from array import array
 import pandas as pd
+import numpy as np
 
 def filtering_data_that_specific_data(code_list: array, data: pd.DataFrame):
     """
@@ -552,7 +553,11 @@ def filtering_value_and_profit_momentum(sheet_name, df: pd.DataFrame):
 
 def filtering_s_rim_disparity_all_data(sheet_name, df: pd.DataFrame):
 
-    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
+    condition = df["S-RIM 적정주가"] >= df["S-RIM -20%"]
+    df.loc[condition, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM 적정주가"]) / df["S-RIM 적정주가"] * 100
+    df.loc[~condition, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM -20%"]) / df["S-RIM -20%"] * 100
+
+    df = df.replace([np.inf, -np.inf], 0)
 
     return (sheet_name,
             df.sort_values(by=["S-RIM 괴리율"], ascending=False).reset_index(drop=True)

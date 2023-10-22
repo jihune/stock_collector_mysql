@@ -73,8 +73,10 @@ if __name__ == "__main__":
             sheet_data.loc[sheet_data['average_roe'] < 0, 'S_RIM_20'] = 0
 
             # BBB- 금리보다 기업의 초과이익이 낮은경우 적정주가 산출이 이상하게 됩니다.
-            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_10'], 'S_RIM_10'] = sheet_data['S_RIM']
-            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_20'], 'S_RIM_20'] = sheet_data['S_RIM']
+            sheet_data.loc[sheet_data['S_RIM'] <= 0, 'S_RIM'] = 0
+            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_10'], 'S_RIM_10'] = 0
+            sheet_data.loc[sheet_data['S_RIM'] < sheet_data['S_RIM_20'], 'S_RIM_20'] = 0
+            sheet_data.loc[sheet_data['S_RIM'] <= 0, 'S-RIM 괴리율'] = 0
 
             sheet_data['S_RIM'] = sheet_data['S_RIM'].astype(int)
             sheet_data['S_RIM_10'] = sheet_data['S_RIM_10'].astype(int)
@@ -83,6 +85,8 @@ if __name__ == "__main__":
         if 'S-RIM 괴리율' in sheet_data.columns:
             sheet_data.rename(columns={'S-RIM 괴리율': 'S_RIM_difr'}, inplace=True)
             # sheet_data = sheet_data.replace([np.inf, -np.inf], 0)
+
+
 
         # 데이터를 MySQL 테이블로 삽입합니다.
         sheet_data.to_sql(table_name, con=engine, if_exists='replace', index=False)

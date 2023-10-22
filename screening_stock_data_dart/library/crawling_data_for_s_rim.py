@@ -6,6 +6,11 @@ from stock.extract_data.extract import Extract
 from pystocklib.common import *
 
 def calculate_company_value(net_worth, roe, k, discount_roe=1.0):   # net_worth: 순자산, roe:3년 가중평균 roe, k: BBB- 회사채 금리
+
+    # 가중평균 ROE가 재무제표상 0인 경우
+    if roe == 0 or k == 0:
+        return net_worth
+
     if discount_roe == 1.0:
         # 기업가치 = 자기자본 + (초과이익 / 할인율)
         # 초과이익 = 자기자본 x (가중평균 ROE - 할인율)
@@ -63,11 +68,13 @@ def get_roe(code):
     # 스크래핑 테스트 시 주석 해제
     # print(f"최근 3년 ROE: {roe3}")
 
-    # 기존 제작자 이상한 코드 주석처리
-    # if roe3[0] <= roe3[1] <= roe3[2] or roe3[0] >= roe3[1] >= roe3[2]:
-    #     roe = roe3[2]
-    # else:
-    roe = (roe3[0] + roe3[1] * 2 + roe3[2] * 3) / 6     # weighting average
+    # ROE 3개년 가중평균 계산
+    if roe3[0] == 0:
+        roe = (roe3[1] + roe3[2] * 2) / 3
+    elif roe3[0] == 0 and roe3[1] == 0:
+        roe = roe3[2]
+    else:
+        roe = (roe3[0] + roe3[1] * 2 + roe3[2] * 3) / 6     # weighting average
 
     return roe
 

@@ -553,10 +553,7 @@ def filtering_value_and_profit_momentum(sheet_name, df: pd.DataFrame):
 
 def filtering_s_rim_disparity_all_data(sheet_name, df: pd.DataFrame):
 
-    condition = df["S-RIM 적정주가"] >= df["S-RIM -20%"]
-    df.loc[condition, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM 적정주가"]) / df["S-RIM 적정주가"] * 100
-    df.loc[~condition, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM -20%"]) / df["S-RIM -20%"] * 100
-
+    df.loc[:, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM 적정주가"]) / df["S-RIM 적정주가"] * 100
     df = df.replace([np.inf, -np.inf], 0)
 
     return (sheet_name,
@@ -576,7 +573,8 @@ def filtering_s_rim_disparity_and_high_nav(sheet_name, df: pd.DataFrame):
 
     df = df[df["연도"] == latest_date].copy()
 
-    df.loc[:, "S-RIM 괴리율"] = df["종가"] / df["S-RIM -20%"] * 100
+    df.loc[:, "S-RIM 괴리율"] = (df["종가"] - df["S-RIM 적정주가"]) / df["S-RIM 적정주가"] * 100
+    df = df.replace([np.inf, -np.inf], 0)
 
     df.loc[:, "NCAV/MC rank"] = df["NCAV/MC"].rank(ascending=False)
     df.loc[:, "S-RIM 괴리율 rank"] = df["S-RIM 괴리율"].rank(ascending=True)
